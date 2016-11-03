@@ -1,0 +1,190 @@
+//Loading Data from Database and Fetch Extra Information on clicking any Record on table  
+Steps Getting Data From Database using ID 
+  1. In Datatables Ajax add code like this
+            {
+                  targets: 5,
+                  data: null,
+                  mRender: function (data, type, full)
+                  { return '<button type="button" class="btn btn-round btn-warning" href="javascript:void(0);" onclick="OpenLeaveEditForm(' + data.LeaveID + ');">Edit</button>'; }
+              },
+   
+   2. Then Create function OpenLeaveEditForm() and pass id to it and then assign that id to hidden field of form and then using ajax to send 
+   the form data to controller and fetch all data based on that id and populate the form fields with the data 
+   
+   3. Do the Changes and Save The form Data in the database using Update command 
+   
+   
+   // Controller Function is Like This
+    [HttpPost]
+        public JsonResult Get_Admin_User_Data_ID(int AdminID)
+        {
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("@AdminID", AdminID.ToString());
+            IEnumerable<tbl_admin_user> users = DataAccessLayer.ExecuteQuery<tbl_admin_user>("get_admin_user_data_id", parameters);
+            return Json(new { msg = users }, JsonRequestBehavior.AllowGet);
+        }
+        
+        OpenLeaveEditForm() is as
+        OpenLeaveEditForm()
+        {
+        
+    $('#hiddefieldID').val(LeaveID);
+    $.ajax({
+        type: "POST",
+        dataType: 'json',
+        url: "/LeaveManage/Get_Leave_Type_By_ID",
+        data: { LeaveID: LeaveID },
+        success: function (data) {
+            
+            var json = JSON.parse(JSON.stringify(data.msg))
+
+            $("#form_leave_edit")[0].reset();
+            
+            $("#LeaveTypeEdit").val(json[0].LeaveType);
+            $("#LeaveCountEdit").val(json[0].LeaveCount);
+            $("#LeavePeriodIDEdit").val(json[0].LeavePeriodID);
+            
+           
+          if (json[0].LeaveActive === true) {
+                $('#LeaveActiveEdit').bootstrapToggle('on')
+            }
+            else {
+                $('#LeaveActiveEdit').bootstrapToggle('off')
+            }
+            $('#modaleditleave').modal('show');
+        },
+        error: function () {
+            show_notification("Error", "Error Occured While Editing User");
+        }
+    });
+        }
+        
+        
+        //After Clicking The Submit Form Do this that is validate the form too
+        
+        
+        $("#form_leave_add").validate({
+        rules: {
+            LeaveType: "required",
+            //LeaveOthertypeDate: "required",
+            LeaveCount: {
+                required: true,
+                number: true
+            }
+
+           
+        },
+        messages: {
+           
+            LeaveType: "Please enter Leave Type",
+           // LeaveOthertypeDate: "Please Select Date",
+            LeaveCount: {
+                required: "Please enter Max Count",
+                number: "Please enter a valid Number"
+            }
+           
+        },
+
+        errorClass: "error-class",
+
+        submitHandler: function (form, e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: "POST",
+                url: "/LeaveManage/Add_Leave_Data",
+                data: $("#form_leave_add").serialize(),
+                success: function (data) {
+                 
+                    if (data != "OK") {
+                        show_notification("Error Creating New User", data);
+                    }
+                    else {
+                        $("#form_leave_add")[0].reset();
+                        $('#UserActive').bootstrapToggle('off')
+                        $('#modaladdleave').modal('toggle');
+                        show_notification("New User Created", "New Levave Type Added Successifully");
+                        var table = $("#admin_leave_manage").DataTable();
+                        table.ajax.reload();
+                    }
+                },
+
+                error: function () {
+                    show_notification("Error Creating User", "Error Occured While Processing Try Again");
+                }
+
+            });
+        }
+});
+
+
+
+//index FIle is AS
+<div class="modal fade" id="modaledituser" tabindex="-1" role="dialog" aria-labelledby="modaldelete" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Edit User</h4>
+            </div>
+            <form class="form-horizontal" id="form_user_edit">
+                <input type="hidden" id="AdminUserIDEdit" name="AdminID" value="0">
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="RoleID" class="col-lg-4 col-sm-4 control-label">Role</label>
+                        <div class="col-md-8">
+                            <select class="form-control m-bot15" id="RoleIDEdit" name="RoleID"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="FirstName" class="col-lg-4 col-sm-4 control-label">First Name</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="FirstNameEdit" name="FirstName" placeholder="Enter First Name" type="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="LastName" class="col-lg-4 col-sm-4 control-label">Last Name</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="LastNameEdit" name="LastName" placeholder="Enter Last Name" type="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Email" class="col-lg-4 col-sm-4 control-label">Email</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="EmailEdit" name="Email" placeholder="Enter Email" type="text" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group deptedit">
+                        <label for="RoleID" class="col-lg-4 col-sm-4 control-label">Department</label>
+                        <div class="col-md-8">
+                            <select class="form-control m-bot15" id="DeptIDEdit" name="DeptID"></select>
+                        </div>
+                    </div>
+                    <div class="form-group deptedit">
+                        <label for="RoleID" class="col-lg-4 col-sm-4 control-label">Employee Code</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="EmployeeCodeEdit" name="EmployeeCode" placeholder="Enter Employee Code" type="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="UserActive" class="col-lg-4 col-sm-4 control-label">Active</label>
+                        <div class="col-md-8">
+                            <input type="checkbox" id="ActiveEdit" name="Active" data-toggle="toggle" data-on="Yes" data-off="No">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                    <button class="btn btn-warning" type="submit">Edit User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+        
