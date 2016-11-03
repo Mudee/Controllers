@@ -23,7 +23,30 @@ Steps Getting Data From Database using ID
             IEnumerable<tbl_admin_user> users = DataAccessLayer.ExecuteQuery<tbl_admin_user>("get_admin_user_data_id", parameters);
             return Json(new { msg = users }, JsonRequestBehavior.AllowGet);
         }
-        
+        //Another Controller Function after editing data is called
+        [HttpPost]
+        public string Edit_Admin_User(tbl_admin_user model)
+        {
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("@AdminID", model.AdminID.ToString());
+            parameters.Add("@RoleID", model.RoleID.ToString());
+            parameters.Add("@FirstName", model.FirstName);
+            parameters.Add("@LastName", model.LastName);
+            parameters.Add("@Email", model.Email.ToLower().Trim());
+            parameters.Add("@DeptID", model.DeptID.ToString());
+            parameters.Add("@EmployeeCode", model.EmployeeCode);
+            parameters.Add("@Active", model.Active.ToString());
+           
+            int returnvalue = DataAccessLayer.ExecuteNonQueryWithReturnValue("sp_update_edit_admin_user", parameters);
+            if (returnvalue == 0)
+            {
+                return "OK";
+            }
+            else
+            {
+                return "Email Address Already Exists";
+            }
+        }
         OpenLeaveEditForm() is as
         OpenLeaveEditForm()
         {
