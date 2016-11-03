@@ -1,0 +1,106 @@
+ //Add The Following Code In the Controller
+ //Email Is also Sended and Email Is Checked For Dublicate
+ 
+ public string Add_Admin_User(tbl_admin_user model)
+        {
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+            parameters.Add("@RoleID", model.RoleID.ToString());
+            parameters.Add("@FirstName", model.FirstName);
+            parameters.Add("@LastName", model.LastName);
+            parameters.Add("@Email", model.Email.ToLower().Trim());
+            parameters.Add("@EmployeeCode", model.EmployeeCode);
+            parameters.Add("@Password", Encryption.Encrypt(model.Password));
+            parameters.Add("@Active", model.Active.ToString());
+            parameters.Add("@DeptID", model.DeptID.ToString());
+            int returnvalue = DataAccessLayer.ExecuteNonQueryWithReturnValue("sp_new_admin_user", parameters);
+            if (returnvalue == 0)
+            {
+                //string body = "Hi, " + model.FirstName + " " + model.LastName + "<br/><br/>Note Your Login Details:<br/><br/>Username : " + model.Email + "<br/><br/>Password : " + model.Password + "<br/><br/>Regards<br/>Bee Swipe Team";
+                //EmailSender.SendMail(model.Email, "New Bee Swipe Admin Account", body);
+                return "OK";
+            }
+            else
+            {
+                return "Email Address Already Exists";
+            }
+
+        }
+        
+        ---------------------------------------------------------------------------------
+        
+        //In View Add The Following Code
+        
+       // Note This Is here Model Popup used to get inputs from admin
+        
+        <div class="modal fade" id="modaladduser" tabindex="-1" role="dialog" aria-labelledby="modaldelete" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add New User</h4>
+            </div>
+            <form class="form-horizontal" id="form_user_add">
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="RoleID" class="col-lg-4 col-sm-4 control-label">Role</label>
+                        <div class="col-md-8">
+                            <select class="form-control m-bot15" id="RoleID" name="RoleID"></select>
+                        </div>
+                    </div>
+                    <div class="form-group department">
+                        <label for="DepartmentID" class="col-lg-4 col-sm-4 control-label">Employee Code</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="EmployeeCode" name="EmployeeCode" placeholder="Enter Employee Code" type="text" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="FirstName" class="col-lg-4 col-sm-4 control-label">First Name</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="FirstName" name="FirstName" placeholder="Enter First Name" type="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="LastName" class="col-lg-4 col-sm-4 control-label">Last Name</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="LastName" name="LastName" placeholder="Enter Last Name" type="text" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group department">
+                        <label for="DepartmentID" class="col-lg-4 col-sm-4 control-label">Department</label>
+                        <div class="col-md-8">
+                            <select class="form-control m-bot15" id="DeptID" name="DeptID"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Email" class="col-lg-4 col-sm-4 control-label">Email</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="Email" name="Email" placeholder="Enter Email" type="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Password" class="col-lg-4 col-sm-4 control-label">Password</label>
+                        <div class="col-md-8">
+                            <input class="form-control" id="Password" name="Password" placeholder="Enter Password" type="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="UserActive" class="col-lg-4 col-sm-4 control-label">Active</label>
+                        <div class="col-md-8">
+                            <input type="checkbox" id="Active" name="Active" data-toggle="toggle" data-on="Yes" data-off="No">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                    <button class="btn btn-warning" type="submit">Create New User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
