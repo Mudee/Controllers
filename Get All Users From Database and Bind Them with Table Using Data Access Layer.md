@@ -63,6 +63,12 @@ var table = $('#admin_user_table');
   function loadtable() {
        
         var oTable = table.dataTable({
+         "fnDrawCallback": function () {
+              
+            $('.one').bootstrapToggle();            //important for when bootstrap toggle not working 
+            
+
+              },
             language: {
                 searchPlaceholder: "Search.....",
                 aria: {
